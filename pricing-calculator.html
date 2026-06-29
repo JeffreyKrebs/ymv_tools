@@ -525,6 +525,47 @@
       margin-bottom: 0.25rem;
     }
 
+    /* ---------- Contact CTA ---------- */
+    .receipt__cta{
+      display: block;
+      width: 100%;
+      margin-top: 1rem;
+      padding: 0.8rem 1rem;
+      background: #4a5c47;
+      border: none;
+      color: #f7f4f0;
+      border-radius: 6px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      transition: background 0.15s ease, transform 0.12s ease;
+      line-height: 1.4;
+    }
+    .receipt__cta:hover{
+      background: #3a4a38;
+      transform: translateY(-1px);
+    }
+    .receipt__cta__label{
+      display: block;
+      font-size: 0.72rem;
+      font-weight: 400;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      opacity: 0.75;
+      margin-bottom: 0.15rem;
+    }
+    .receipt__cta__main{
+      display: block;
+      font-family: 'Playfair Display', serif;
+      font-variant-caps: small-caps;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
     /* Reset link — centered below the note */
     .receipt__reset{
       display: flex;
@@ -767,6 +808,10 @@
             e&#8209;Transfer: Fast and secure.<br>
             Cash: Accepted if you prefer paying in person.
           </div>
+          <a href="https://yourmemoryvault.ca/#contactform" target="_blank" class="receipt__cta">
+            <span class="receipt__cta__label">Ready to get started?</span>
+            <span class="receipt__cta__main">Book Your Scan →</span>
+          </a>
           <div class="receipt__reset">
             <button type="button" class="reset-link" id="resetBtn">
               <span class="reset-link__icon" aria-hidden="true">↺</span>
