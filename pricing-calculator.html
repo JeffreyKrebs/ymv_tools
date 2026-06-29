@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+  <html lang="en">
+  <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Memory Vault — Pricing Estimator</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Source+Sans+3:wght@400;500;600;700&display=swap');
+
+    :root{
+      --page-bg: #dcdad6;
+      --card-bg: #ffffff;
+      --surface: #f7f4f0;
+      --surface-selected: #f7e4d2;
+      --border: #e3ded6;
+      --text: #4a4a4a;
+      --text-soft: #938e87;
+      --accent: #c97c3f;
+      --accent-hover: #ad6730;
+      --radius: 4px;
+    }
+
+    *{ box-sizing: border-box; }
+    html,body{ margin:0; padding:0; }
+
+    body{
+      background-color: var(--page-bg);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='480' height='480'%3E%3Cg fill='none' stroke='rgba(178,138,94,0.18)' stroke-width='1'%3E%3Ccircle cx='55' cy='430' r='225'/%3E%3Ccircle cx='435' cy='60' r='175'/%3E%3Ccircle cx='245' cy='250' r='110'/%3E%3Cline x1='0' y1='480' x2='480' y2='0'/%3E%3C/g%3E%3C/svg%3E");
+      background-attachment: fixed;
+      background-size: 480px 480px;
+      color: var(--text);
+      font-family: 'Source Sans 3', system-ui, sans-serif;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .page{ padding: 2.5rem 1.25rem; }
+    .print{
+      max-width: 1080px;
+      margin: 0 auto;
+      background: var(--card-bg);
+      border-radius: 6px;
+      border: 1px solid rgba(60,50,40,0.05);
+      box-shadow: 0 14px 44px rgba(60,50,40,0.14), 0 2px 8px rgba(60,50,40,0.06);
+      padding: 2.75rem;
+    }
+    @media (max-width: 640px){
+      .page{ padding: 0; }
+      .print{ border-radius: 0; border: none; box-shadow: none; padding: 1.6rem 1.25rem 2rem; }
+    }
+
+    /* ---------- Header ---------- */
+    .header{
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 2rem;
+      margin-bottom: 2.25rem;
+    }
+    .eyebrow{
+      font-size: 0.74rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin: 0 0 0.7rem;
+    }
+    .header h1{
+      font-family: 'Playfair Display', serif;
+      font-variant-caps: small-caps;
+      font-weight: 800;
+      color: var(--accent);
+      font-size: clamp(2.4rem, 6vw, 3.7rem);
+      line-height: 1.05;
+      letter-spacing: 0.01em;
+      margin: 0 0 0.4rem;
+    }
+    .lede{
+      max-width: 54ch;
+      font-size: 1.02rem;
+      margin: 0;
+    }
+
+    /* ---------- Layout ---------- */
+    .layout{
+      display: grid;
+      grid-template-columns: 1.6fr 1fr;
+      gap: 2.5rem;
+      align-items: start;
+    }
+    @media (max-width: 920px){
+      .layout{ grid-template-columns: 1fr; }
+    }
+
+    .builder{ display: flex; flex-direction: column; gap: 2.25rem; }
+
+    .step__eyebrow{
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-soft);
+      margin: 0 0 0.45rem;
+    }
+    .step__title{
+      font-family: 'Playfair Display', serif;
+      font-variant-caps: small-caps;
+      font-weight: 700;
+      color: var(--accent);
+      font-size: 1.65rem;
+      margin: 0 0 0.95rem;
+    }
+    .step__hint{
+      font-size: 0.92rem;
+      color: var(--text-soft);
+      margin: -0.5rem 0 0.95rem;
+    }
+
+    /* ---------- Flow divider ---------- */
+    .flow-divider{ display: flex; justify-content: center; margin: -0.6rem 0; }
+    .flow-divider__circle{
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      background: var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 3px 10px rgba(201,124,63,0.35);
+    }
+
+    /* ---------- Package cards ---------- */
+    .packages{
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.9rem;
+    }
+    @media (max-width: 640px){
+      .packages{ grid-template-columns: 1fr; }
+    }
+    .package-card{
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      padding: 1.2rem 1.1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: box-shadow 0.15s ease, transform 0.15s ease, background 0.15s ease;
+    }
+    .package-card input{ position: absolute; opacity: 0; width: 0; height: 0; }
+    .package-card:hover{ transform: translateY(-2px); }
+    .package-card.is-selected{
+      background: var(--surface-selected);
+      box-shadow: 0 0 0 2px var(--accent) inset;
+    }
+    .package-card.is-selected .package-card__name{ color: var(--accent); }
+    .package-card__name{
+      font-family: 'Playfair Display', serif;
+      font-variant-caps: small-caps;
+      font-weight: 700;
+      font-size: 1.25rem;
+    }
+    .package-card__photos{ font-size: 0.82rem; color: var(--text-soft); }
+    .package-card__price{
+      font-weight: 700;
+      font-size: 1.45rem;
+      font-variant-numeric: tabular-nums;
+      margin-top: 0.25rem;
+    }
+    .package-card__rate{
+      font-size: 0.78rem;
+      color: var(--text-soft);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ---------- Stepper ---------- */
+    .stepper{ display: inline-flex; align-items: center; gap: 0.85rem; }
+    .stepper__btn{
+      width: 2.6rem; height: 2.6rem;
+      border-radius: 50%;
+      border: none;
+      background: var(--accent);
+      color: #fff;
+      font-size: 1.3rem;
+      line-height: 1;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 3px 10px rgba(201,124,63,0.35);
+      transition: background 0.15s ease, transform 0.15s ease;
+    }
+    .stepper__btn:hover{ background: var(--accent-hover); transform: translateY(-1px); }
+    .stepper input{
+      width: 6.5rem;
+      text-align: center;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--surface);
+      color: var(--text);
+      padding: 0.65rem 0.5rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      font-family: inherit;
+      font-variant-numeric: tabular-nums;
+      -moz-appearance: textfield;
+    }
+    .stepper input::-webkit-outer-spin-button,
+    .stepper input::-webkit-inner-spin-button{ -webkit-appearance: none; margin: 0; }
+    .stepper input:focus{ outline: none; border-color: var(--accent); }
+
+    /* ---------- Add-ons ---------- */
+    .addons{ display: flex; flex-direction: column; gap: 0.7rem; }
+    .addon-row{
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+      padding: 1rem 1.1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: box-shadow 0.15s ease, background 0.15s ease;
+    }
+    .addon-row input{ position: absolute; opacity: 0; width: 0; height: 0; }
+    .addon-row__check{
+      flex-shrink: 0;
+      width: 1.25rem; height: 1.25rem;
+      border: 1.5px solid var(--border);
+      border-radius: 4px;
+      background: var(--card-bg);
+      display: flex; align-items: center; justify-content: center;
+      transition: border-color 0.15s ease;
+    }
+    .addon-row__check::after{
+      content: "";
+      width: 0.62rem; height: 0.62rem;
+      border-radius: 2px;
+      background: var(--accent);
+      transform: scale(0);
+      transition: transform 0.12s ease;
+    }
+    .addon-row.is-checked{
+      background: var(--surface-selected);
+      box-shadow: 0 0 0 2px var(--accent) inset;
+    }
+    .addon-row.is-checked .addon-row__check{ border-color: var(--accent); }
+    .addon-row.is-checked .addon-row__check::after{ transform: scale(1); }
+    .addon-row__text{ flex: 1; }
+    .addon-row__label{ display: block; font-size: 0.97rem; }
+    .addon-row__sub{
+      display: block;
+      font-size: 0.8rem;
+      color: var(--text-soft);
+      margin-top: 0.15rem;
+    }
+    .addon-row__price{
+      font-weight: 600;
+      font-size: 0.96rem;
+      font-variant-numeric: tabular-nums;
+      color: var(--text-soft);
+      text-align: right;
+      white-space: nowrap;
+    }
+    .addon-row.is-checked .addon-row__price{ color: var(--accent); }
+
+    /* ---------- Back-scan add-on block ---------- */
+    .addon-block{
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .addon-block__header{
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+      padding: 1rem 1.1rem;
+      background: var(--surface);
+      cursor: pointer;
+      transition: background 0.15s ease, box-shadow 0.15s ease;
+    }
+    .addon-block__header input{ position: absolute; opacity: 0; width: 0; height: 0; }
+    .addon-block__header .addon-row__check{
+      flex-shrink: 0;
+      width: 1.25rem; height: 1.25rem;
+      border: 1.5px solid var(--border);
+      border-radius: 4px;
+      background: var(--card-bg);
+      display: flex; align-items: center; justify-content: center;
+      transition: border-color 0.15s ease;
+    }
+    .addon-block__header .addon-row__check::after{
+      content: "";
+      width: 0.62rem; height: 0.62rem;
+      border-radius: 2px;
+      background: var(--accent);
+      transform: scale(0);
+      transition: transform 0.12s ease;
+    }
+    .addon-block.is-checked .addon-block__header{
+      background: var(--surface-selected);
+      box-shadow: 0 0 0 2px var(--accent) inset;
+    }
+    .addon-block.is-checked .addon-block__header .addon-row__check{ border-color: var(--accent); }
+    .addon-block.is-checked .addon-block__header .addon-row__check::after{ transform: scale(1); }
+    .addon-block__text{ flex: 1; }
+    .addon-block__label{ display: block; font-size: 0.97rem; }
+    .addon-block__label strong{ font-weight: 600; }
+    .addon-block__sub{
+      display: block;
+      font-size: 0.8rem;
+      color: var(--text-soft);
+      margin-top: 0.15rem;
+    }
+    .addon-block__price-col{
+      text-align: right;
+      flex-shrink: 0;
+    }
+    .addon-block__rate{
+      display: block;
+      font-weight: 600;
+      font-size: 0.96rem;
+      font-variant-numeric: tabular-nums;
+      color: var(--text-soft);
+      white-space: nowrap;
+    }
+    .addon-block.is-checked .addon-block__rate{ color: var(--accent); }
+    .addon-block__total{
+      display: block;
+      font-size: 0.78rem;
+      color: var(--text-soft);
+      font-variant-numeric: tabular-nums;
+      margin-top: 0.1rem;
+      white-space: nowrap;
+    }
+    .addon-block.is-checked .addon-block__total{ color: var(--accent); opacity: 0.8; }
+
+    /* ---------- Pickup fieldset ---------- */
+    .pickup-group{
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      padding: 1rem 1.1rem 1.1rem;
+      margin: 0;
+    }
+    .pickup-group legend{
+      float: left;
+      width: 100%;
+      font-size: 0.97rem;
+      font-weight: 400;
+      font-family: 'Source Sans 3', system-ui, sans-serif;
+      color: var(--text);
+      padding: 0;
+      margin: 0 0 0.75rem;
+      line-height: 1.55;
+    }
+    .pickup-group legend + *{ clear: both; }
+
+    /* Zone selector */
+    .segmented{
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+    }
+    @media (max-width: 560px){
+      .segmented{ grid-template-columns: 1fr; }
+    }
+    .segmented__input{ position: absolute; opacity: 0; width: 0; height: 0; }
+    .segmented__option{
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.2rem;
+      text-align: center;
+      padding: 0.7rem 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--card-bg);
+      cursor: pointer;
+      transition: box-shadow 0.15s ease, background 0.15s ease;
+    }
+    .segmented__option.is-selected{
+      background: var(--surface-selected);
+      box-shadow: 0 0 0 2px var(--accent) inset;
+    }
+    .segmented__title{ font-size: 0.87rem; }
+    .segmented__price{
+      font-size: 0.78rem;
+      color: var(--text-soft);
+      font-variant-numeric: tabular-nums;
+    }
+    .segmented__option.is-selected .segmented__title{ color: var(--accent); font-weight: 600; }
+
+    /* Trip toggles */
+    .trip-toggles{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      transition: max-height 0.25s ease, opacity 0.2s ease, margin-top 0.25s ease;
+    }
+    .trip-toggles.is-visible{
+      max-height: 120px;
+      opacity: 1;
+      margin-top: 0.75rem;
+    }
+    @media (max-width: 560px){
+      .trip-toggles{ grid-template-columns: 1fr; }
+      .trip-toggles.is-visible{ max-height: 180px; }
+    }
+
+    .trip-toggle{
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.2rem;
+      text-align: center;
+      padding: 0.75rem 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--card-bg);
+      cursor: pointer;
+      transition: box-shadow 0.15s ease, background 0.15s ease;
+    }
+    .trip-toggle input{ position: absolute; opacity: 0; width: 0; height: 0; }
+    .trip-toggle.is-checked{
+      background: var(--surface-selected);
+      box-shadow: 0 0 0 2px var(--accent) inset;
+    }
+    .trip-toggle__icon{ font-size: 1.1rem; line-height: 1; }
+    .trip-toggle__label{ font-size: 0.87rem; color: var(--text); }
+    .trip-toggle.is-checked .trip-toggle__label{ color: var(--accent); font-weight: 600; }
+    .trip-toggle__price{ font-size: 0.78rem; color: var(--text-soft); font-variant-numeric: tabular-nums; }
+    .trip-toggle.is-checked .trip-toggle__price{ color: var(--accent); }
+
+    /* ---------- Receipt ---------- */
+    .receipt{
+      position: sticky;
+      top: 1.5rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.7rem 1.6rem 1.6rem;
+      box-shadow: 0 6px 22px rgba(60,50,40,0.06);
+    }
+    @media (max-width: 920px){
+      .receipt{ position: static; }
+    }
+    .receipt__eyebrow{
+      font-family: 'Playfair Display', serif;
+      font-variant-caps: small-caps;
+      font-weight: 700;
+      color: var(--accent);
+      font-size: 1.35rem;
+      margin: 0 0 1.1rem;
+    }
+    .receipt__lines{
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      font-size: 0.92rem;
+    }
+    .receipt__line{ display: flex; justify-content: space-between; gap: 1rem; }
+    .receipt__line-label{ color: var(--text-soft); }
+    .receipt__line-value{ font-weight: 600; font-variant-numeric: tabular-nums; }
+    .receipt__divider{
+      height: 1px;
+      margin: 1.15rem 0;
+      background-image: repeating-linear-gradient(to right, var(--border) 0 7px, transparent 7px 14px);
+    }
+    .receipt__total{ display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; }
+    .receipt__total-label{
+      font-family: 'Playfair Display', serif;
+      font-variant-caps: small-caps;
+      font-weight: 600;
+      font-size: 1.08rem;
+    }
+    .receipt__total-value{
+      font-weight: 700;
+      font-size: 1.95rem;
+      color: var(--accent);
+      font-variant-numeric: tabular-nums;
+      transition: transform 0.15s ease;
+    }
+    .receipt__total-value.bump{ transform: scale(1.06); }
+
+    .copy-btn{
+      display: block;
+      width: 100%;
+      margin-top: 1.4rem;
+      padding: 0.75rem 1rem;
+      background: var(--accent);
+      border: none;
+      color: #fff;
+      border-radius: 6px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+    .copy-btn:hover{ background: var(--accent-hover); }
+
+    .receipt__note{
+      font-size: 0.78rem;
+      color: var(--text-soft);
+      margin: 1.1rem 0 0;
+      line-height: 1.45;
+    }
+
+    .receipt__payment{
+      font-size: 0.78rem;
+      color: var(--text-soft);
+      margin: 0.6rem 0 0;
+      line-height: 1.55;
+      border-top: 1px solid var(--border);
+      padding-top: 0.75rem;
+    }
+    .receipt__payment strong{
+      display: block;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.25rem;
+    }
+
+    /* Reset link — centered below the note */
+    .receipt__reset{
+      display: flex;
+      justify-content: center;
+      margin-top: 0.85rem;
+      padding-top: 0.85rem;
+      border-top: 1px dashed var(--border);
+    }
+    .reset-link{
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.78rem;
+      letter-spacing: 0.03em;
+      color: var(--text-soft);
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      font-family: inherit;
+      transition: color 0.15s ease;
+    }
+    .reset-link:hover{ color: var(--accent); }
+    .reset-link__icon{
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.35rem;
+      height: 1.35rem;
+      border-radius: 50%;
+      border: 1px solid currentColor;
+      font-size: 0.75rem;
+      flex-shrink: 0;
+      transition: border-color 0.15s ease;
+    }
+
+    /* ---------- Mobile sticky total bar ---------- */
+    .mobile-bar{ display: none; }
+    @media (max-width: 920px){
+      .mobile-bar{
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: fixed;
+        left: 0; right: 0; bottom: 0;
+        padding: 0.9rem 1.25rem;
+        padding-bottom: max(0.9rem, env(safe-area-inset-bottom));
+        background: var(--card-bg);
+        border-top: 1px solid var(--border);
+        box-shadow: 0 -4px 16px rgba(60,50,40,0.08);
+        z-index: 10;
+      }
+      .mobile-bar span{ font-size: 0.78rem; color: var(--text-soft); letter-spacing: 0.08em; text-transform: uppercase; }
+      .mobile-bar strong{ font-size: 1.3rem; color: var(--accent); font-variant-numeric: tabular-nums; }
+      .page{ padding-bottom: 4.5rem; }
+    }
+
+    /* ---------- Focus & motion ---------- */
+    a:focus-visible, button:focus-visible, input:focus-visible,
+    .package-card:has(input:focus-visible),
+    .addon-row:has(input:focus-visible),
+    .addon-block__header:has(input:focus-visible),
+    .segmented__option:has(input:focus-visible),
+    .trip-toggle:has(input:focus-visible){
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    @media (prefers-reduced-motion: reduce){
+      *{ transition: none !important; }
+    }
+  </style>
+  </head>
+  <body>
+  <div class="page">
+    <div class="print">
+
+      <header class="header">
+        <h1>Your Memory Vault</h1>
+      </header>
+
+      <div class="layout">
+        <section class="builder">
+
+          <!-- Step 1: Package -->
+          <div class="step">
+            <p class="step__eyebrow">Choose your package</p>
+            <h2 class="step__title">Package Tier</h2>
+            <div class="packages" role="radiogroup" aria-label="Package tier">
+              <label class="package-card" data-package="essentials">
+                <input type="radio" name="package" value="essentials" checked>
+                <span class="package-card__name">Essentials</span>
+                <span class="package-card__photos">200 photos included</span>
+                <span class="package-card__price">$99.00</span>
+                <span class="package-card__rate">then $0.50 / extra photo</span>
+              </label>
+              <label class="package-card" data-package="keepsake">
+                <input type="radio" name="package" value="keepsake">
+                <span class="package-card__name">Keepsake</span>
+                <span class="package-card__photos">500 photos included</span>
+                <span class="package-card__price">$199.00</span>
+                <span class="package-card__rate">then $0.40 / extra photo</span>
+              </label>
+              <label class="package-card" data-package="legacy">
+                <input type="radio" name="package" value="legacy">
+                <span class="package-card__name">Legacy</span>
+                <span class="package-card__photos">1,200 photos included</span>
+                <span class="package-card__price">$399.00</span>
+                <span class="package-card__rate">then $0.30 / extra photo</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="flow-divider" aria-hidden="true">
+            <span class="flow-divider__circle">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 9l7 7 7-7" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+          </div>
+
+          <!-- Step 2: Extra photos -->
+          <div class="step">
+            <p class="step__eyebrow">Extra photos</p>
+            <h2 class="step__title">More Than The Included Count?</h2>
+            <p class="step__hint" id="extraHint">The Essentials package includes 200 photos. Enter how many additional photos you'd like scanned.</p>
+            <div class="stepper">
+              <button type="button" class="stepper__btn" data-step="-1" aria-label="Decrease extra photos">−</button>
+              <input type="number" id="extraPhotos" min="0" step="10" value="0" inputmode="numeric" aria-label="Extra photos beyond the included amount">
+              <button type="button" class="stepper__btn" data-step="1" aria-label="Increase extra photos">+</button>
+            </div>
+          </div>
+
+          <div class="flow-divider" aria-hidden="true">
+            <span class="flow-divider__circle">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 9l7 7 7-7" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+          </div>
+
+          <!-- Step 3: Add-ons -->
+          <div class="step">
+            <p class="step__eyebrow">Add-ons</p>
+            <h2 class="step__title">Anything Else?</h2>
+            <div class="addons">
+
+              <!-- Back-of-photo scanning — dynamic per-photo block -->
+              <div class="addon-block" id="backscanBlock">
+                <label class="addon-block__header">
+                  <input type="checkbox" id="addon-backscan">
+                  <span class="addon-row__check" aria-hidden="true"></span>
+                  <span class="addon-block__text">
+                    <span class="addon-block__label">Scan the back of each photo</span>
+                    <span class="addon-block__sub">Preserves handwritten dates, names, and notes hidden on the reverse — scanned and saved alongside every front image.</span>
+                  </span>
+                  <span class="addon-block__price-col">
+                    <span class="addon-block__rate" id="backscanRate">$0.20 / photo</span>
+                    <span class="addon-block__total" id="backscanTotal"></span>
+                  </span>
+                </label>
+              </div>
+
+              <label class="addon-row" data-addon="cloud" data-price="45">
+                <input type="checkbox" id="addon-cloud">
+                <span class="addon-row__check" aria-hidden="true"></span>
+                <span class="addon-row__text">
+                  <span class="addon-row__label">Backup to any cloud</span>
+                </span>
+                <span class="addon-row__price">$45.00</span>
+              </label>
+
+              <label class="addon-row" data-addon="usb" data-price="25">
+                <input type="checkbox" id="addon-usb">
+                <span class="addon-row__check" aria-hidden="true"></span>
+                <span class="addon-row__text">
+                  <span class="addon-row__label">Archive to USB thumb drive</span>
+                  <span class="addon-row__sub">Includes 1 USB thumb drive</span>
+                </span>
+                <span class="addon-row__price">$25.00</span>
+              </label>
+
+              <!-- Pickup fieldset -->
+              <fieldset class="pickup-group">
+                <legend>In-home photo pickup &amp; drop-off</legend>
+                <div class="segmented" role="radiogroup" aria-label="Zone">
+                  <input type="radio" name="pickup" id="pickup-none" value="0" class="segmented__input" checked>
+                  <label for="pickup-none" class="segmented__option" id="zone-label-none">
+                    <span class="segmented__title">Not needed</span>
+                  </label>
+                  <input type="radio" name="pickup" id="pickup-kelowna" value="45" class="segmented__input">
+                  <label for="pickup-kelowna" class="segmented__option" id="zone-label-kelowna">
+                    <span class="segmented__title">Kelowna</span>
+                    <span class="segmented__price">$45.00 / trip</span>
+                  </label>
+                  <input type="radio" name="pickup" id="pickup-west" value="55" class="segmented__input">
+                  <label for="pickup-west" class="segmented__option" id="zone-label-west">
+                    <span class="segmented__title">West Kelowna / Lake Country</span>
+                    <span class="segmented__price">$55.00 / trip</span>
+                  </label>
+                </div>
+                <div class="trip-toggles" id="tripToggles" aria-label="Which trips do you need?">
+                  <label class="trip-toggle" id="toggle-pickup">
+                    <input type="checkbox" id="trip-pickup">
+                    <span class="trip-toggle__icon">📦→</span>
+                    <span class="trip-toggle__label">I pick up your photos</span>
+                    <span class="trip-toggle__price" id="trip-pickup-price">+$45.00</span>
+                  </label>
+                  <label class="trip-toggle" id="toggle-dropoff">
+                    <input type="checkbox" id="trip-dropoff">
+                    <span class="trip-toggle__icon">→📬</span>
+                    <span class="trip-toggle__label">I return your photos</span>
+                    <span class="trip-toggle__price" id="trip-dropoff-price">+$45.00</span>
+                  </label>
+                </div>
+              </fieldset>
+
+              <label class="addon-row" data-addon="rush" data-price="150">
+                <input type="checkbox" id="addon-rush">
+                <span class="addon-row__check" aria-hidden="true"></span>
+                <span class="addon-row__text">
+                  <span class="addon-row__label">Rush service (48 hours)</span>
+                </span>
+                <span class="addon-row__price">$150.00</span>
+              </label>
+
+            </div>
+          </div>
+
+        </section>
+
+        <!-- Receipt -->
+        <aside class="receipt" aria-live="polite">
+          <p class="receipt__eyebrow">Your Estimate</p>
+          <div class="receipt__lines" id="receiptLines"></div>
+          <div class="receipt__divider" aria-hidden="true"></div>
+          <div class="receipt__total">
+            <span class="receipt__total-label">Estimate Total</span>
+            <span class="receipt__total-value" id="totalValue">$99.00</span>
+          </div>
+          <button type="button" class="copy-btn" id="copyBtn">Copy estimate</button>
+          <p class="receipt__note">All prices exclude tax. Standard BC tax rates apply.</p>
+          <div class="receipt__payment">
+            <strong>Payments accepted:</strong>
+            e&#8209;Transfer: Fast and secure.<br>
+            Cash: Accepted if you prefer paying in person.
+          </div>
+          <div class="receipt__reset">
+            <button type="button" class="reset-link" id="resetBtn">
+              <span class="reset-link__icon" aria-hidden="true">↺</span>
+              Start Over
+            </button>
+          </div>
+        </aside>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="mobile-bar">
+    <span>Estimate total</span>
+    <strong id="mobileTotalValue">$99.00</strong>
+  </div>
+
+  <script>
+    const BACKSCAN_RATE = 0.20;
+
+    const packages = {
+      essentials:   { name: "Essentials",   photos: 200,  base: 99.00, rate: 0.50 },
+      keepsake: { name: "Keepsake", photos: 500,  base: 199.00, rate: 0.40 },
+      legacy:     { name: "Legacy",     photos: 1200, base: 399.00, rate: 0.30 }
+    };
+
+    const currency = new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD' });
+    const fmt = (n) => currency.format(n);
+
+    const els = {
+      extraPhotos:      document.getElementById('extraPhotos'),
+      extraHint:        document.getElementById('extraHint'),
+      receiptLines:     document.getElementById('receiptLines'),
+      totalValue:       document.getElementById('totalValue'),
+      mobileTotalValue: document.getElementById('mobileTotalValue'),
+      copyBtn:          document.getElementById('copyBtn'),
+      resetBtn:         document.getElementById('resetBtn'),
+      tripToggles:      document.getElementById('tripToggles'),
+      tripPickup:       document.getElementById('trip-pickup'),
+      tripDropoff:      document.getElementById('trip-dropoff'),
+      tripPickupPrice:  document.getElementById('trip-pickup-price'),
+      tripDropoffPrice: document.getElementById('trip-dropoff-price'),
+      togglePickup:     document.getElementById('toggle-pickup'),
+      toggleDropoff:    document.getElementById('toggle-dropoff'),
+      addonBackscan:    document.getElementById('addon-backscan'),
+      backscanBlock:    document.getElementById('backscanBlock'),
+      backscanTotal:    document.getElementById('backscanTotal'),
+    };
+
+    const packageInputs  = document.querySelectorAll('input[name="package"]');
+    const pickupInputs   = document.querySelectorAll('input[name="pickup"]');
+    const addonRows      = document.querySelectorAll('.addon-row');
+    const tripCheckboxes = [els.tripPickup, els.tripDropoff];
+
+    function getSelectedPackage(){
+      return packages[document.querySelector('input[name="package"]:checked').value];
+    }
+    function getExtraPhotos(){
+      let val = parseInt(els.extraPhotos.value, 10);
+      if (isNaN(val) || val < 0) val = 0;
+      return val;
+    }
+    function getTotalPhotos(){
+      return getSelectedPackage().photos + getExtraPhotos();
+    }
+    function getZone(){
+      const checked = document.querySelector('input[name="pickup"]:checked');
+      return { rate: parseFloat(checked.value), id: checked.id };
+    }
+    function getZoneLabel(){
+      const el = document.querySelector('.segmented__option.is-selected .segmented__title');
+      return el ? el.textContent.trim() : '';
+    }
+
+    function updateSelectedStyles(){
+      document.querySelectorAll('.package-card').forEach(card => {
+        card.classList.toggle('is-selected', card.querySelector('input').checked);
+      });
+      document.querySelectorAll('.segmented__option').forEach(opt => {
+        const input = document.getElementById(opt.getAttribute('for'));
+        opt.classList.toggle('is-selected', input && input.checked);
+      });
+      addonRows.forEach(row => {
+        row.classList.toggle('is-checked', row.querySelector('input').checked);
+      });
+      tripCheckboxes.forEach(cb => {
+        cb.closest('.trip-toggle').classList.toggle('is-checked', cb.checked);
+      });
+      els.backscanBlock.classList.toggle('is-checked', els.addonBackscan.checked);
+    }
+
+    function updateTripToggles(){
+      const zone = getZone();
+      const hasZone = zone.rate > 0;
+      els.tripToggles.classList.toggle('is-visible', hasZone);
+      const priceStr = hasZone ? `+${fmt(zone.rate)}` : '';
+      els.tripPickupPrice.textContent  = priceStr;
+      els.tripDropoffPrice.textContent = priceStr;
+      if (!hasZone){
+        els.tripPickup.checked  = false;
+        els.tripDropoff.checked = false;
+      }
+    }
+
+    function updateBackscanUI(){
+      const total = getTotalPhotos();
+      const cost  = total * BACKSCAN_RATE;
+      els.backscanTotal.textContent = els.addonBackscan.checked
+        ? `${total.toLocaleString()} photos = ${fmt(cost)}`
+        : `${total.toLocaleString()} photos × $0.20 = ${fmt(cost)}`;
+    }
+
+    function render(){
+      updateSelectedStyles();
+      updateTripToggles();
+      updateBackscanUI();
+
+      const pkg       = getSelectedPackage();
+      const extra     = getExtraPhotos();
+      const extraCost = extra * pkg.rate;
+      const zone      = getZone();
+      const totalPhotos   = pkg.photos + extra;
+      const backscanCost  = els.addonBackscan.checked ? totalPhotos * BACKSCAN_RATE : 0;
+
+      els.extraHint.textContent =
+        `The ${pkg.name} package includes ${pkg.photos.toLocaleString()} photos. Enter how many additional photos you'd like scanned.`;
+
+      const lines = [];
+      lines.push({ label: `${pkg.name} package`, value: pkg.base });
+      if (extra > 0){
+        lines.push({ label: `Extra photos (${extra.toLocaleString()} × $${pkg.rate.toFixed(2)})`, value: extraCost });
+      }
+      if (els.addonBackscan.checked){
+        lines.push({ label: `Back-of-photo scanning (${totalPhotos.toLocaleString()} × $0.20)`, value: backscanCost });
+      }
+      addonRows.forEach(row => {
+        if (row.querySelector('input').checked){
+          lines.push({ label: row.querySelector('.addon-row__label').textContent.trim(), value: parseFloat(row.dataset.price) });
+        }
+      });
+      if (zone.rate > 0){
+        const zoneName = getZoneLabel();
+        if (els.tripPickup.checked)  lines.push({ label: `Pickup trip — ${zoneName}`,   value: zone.rate });
+        if (els.tripDropoff.checked) lines.push({ label: `Drop-off trip — ${zoneName}`, value: zone.rate });
+      }
+
+      let total = pkg.base + extraCost + backscanCost;
+      addonRows.forEach(row => { if (row.querySelector('input').checked) total += parseFloat(row.dataset.price); });
+      if (zone.rate > 0){
+        if (els.tripPickup.checked)  total += zone.rate;
+        if (els.tripDropoff.checked) total += zone.rate;
+      }
+
+      els.receiptLines.innerHTML = lines.map(line => `
+        <div class="receipt__line">
+          <span class="receipt__line-label">${line.label}</span>
+          <span class="receipt__line-value">${fmt(line.value)}</span>
+        </div>
+      `).join('');
+
+      const totalText = fmt(total);
+      els.totalValue.textContent       = totalText;
+      els.mobileTotalValue.textContent = totalText;
+      els.totalValue.classList.remove('bump');
+      requestAnimationFrame(() => els.totalValue.classList.add('bump'));
+    }
+
+    packageInputs.forEach(input => input.addEventListener('change', render));
+    pickupInputs.forEach(input  => input.addEventListener('change', render));
+    addonRows.forEach(row       => row.querySelector('input').addEventListener('change', render));
+    tripCheckboxes.forEach(cb   => cb.addEventListener('change', render));
+    els.addonBackscan.addEventListener('change', render);
+
+    els.extraPhotos.addEventListener('input', render);
+    els.extraPhotos.addEventListener('blur', () => { els.extraPhotos.value = getExtraPhotos(); render(); });
+
+    document.querySelectorAll('.stepper__btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        els.extraPhotos.value = Math.max(0, getExtraPhotos() + parseInt(btn.dataset.step, 10) * 10);
+        render();
+      });
+    });
+
+    els.copyBtn.addEventListener('click', () => {
+      const lines = Array.from(els.receiptLines.querySelectorAll('.receipt__line')).map(line =>
+        `${line.querySelector('.receipt__line-label').textContent}: ${line.querySelector('.receipt__line-value').textContent}`
+      );
+      lines.push(`Estimate total: ${els.totalValue.textContent}`);
+      lines.push('All prices exclude tax. Standard BC tax rates apply.');
+      navigator.clipboard.writeText(`Your Memory Vault — Estimate\n\n${lines.join('\n')}`).then(() => {
+        const original = els.copyBtn.textContent;
+        els.copyBtn.textContent = 'Copied to clipboard ✓';
+        setTimeout(() => { els.copyBtn.textContent = original; }, 1800);
+      });
+    });
+
+    els.resetBtn.addEventListener('click', () => {
+      document.getElementById('pickup-none').checked = true;
+      document.querySelector('input[name="package"][value="essentials"]').checked = true;
+      addonRows.forEach(row => { row.querySelector('input').checked = false; });
+      tripCheckboxes.forEach(cb => { cb.checked = false; });
+      els.addonBackscan.checked = false;
+      els.extraPhotos.value = 0;
+      render();
+    });
+
+    render();
+  </script>
+  </body>
+  </html>
