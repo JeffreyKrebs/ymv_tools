@@ -82,6 +82,40 @@
         height: 16px;
         display: inline-block;
     }
+
+    /* ---------- Contact CTA ---------- */
+    .contact-cta {
+        display: block;
+        max-width: 480px;
+        margin: 40px auto 10px;
+        padding: 1rem 1.5rem;
+        background: #4a5c47;
+        border-radius: 10px;
+        text-align: center;
+        text-decoration: none;
+        color: #f7f4f0;
+        transition: background 0.15s ease, transform 0.12s ease;
+        box-shadow: 0 6px 18px rgba(74,92,71,0.25);
+    }
+    .contact-cta:hover {
+        background: #3a4a38;
+        transform: translateY(-2px);
+    }
+    .contact-cta__label {
+        display: block;
+        font-size: 0.72rem;
+        font-weight: 400;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        opacity: 0.75;
+        margin-bottom: 0.2rem;
+    }
+    .contact-cta__main {
+        display: block;
+        font-size: 1.15rem;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+    }
 </style>
 
 <script>
@@ -205,6 +239,12 @@ document.addEventListener("DOMContentLoaded", () => {
         Absolutely: All originals, envelopes, and groupings are returned exactly as received.
     </div>
 </div>
+
+
+<a href="https://yourmemoryvault.ca/#contactform" target="_blank" class="contact-cta">
+    <span class="contact-cta__label">Ready to preserve your memories?</span>
+    <span class="contact-cta__main">Book Your Scan →</span>
+</a>
 
 </body>
 </html>
